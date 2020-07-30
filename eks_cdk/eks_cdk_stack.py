@@ -38,7 +38,7 @@ class EksCdkStack(core.Stack):
 
         # Role
         eks_role = iam.Role(self, name_id+'-role',
-                            assumed_by=iam.AccountRootPrincipal(),
+                            assumed_by=iam.ServicePrincipal('eks.amazonaws.com'),
                             role_name="EksRole")
         eks_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEKSClusterPolicy'))
         eks_role.add_managed_policy(iam.ManagedPolicy.from_aws_managed_policy_name('AmazonEKSServicePolicy'))
@@ -47,7 +47,8 @@ class EksCdkStack(core.Stack):
         cluster = eks.Cluster(self, name_id,
                               default_capacity=0,
                               cluster_name=name_id+'-cluster',
-                              masters_role=eks_role,
+                              masters_role=iam.AccountRootPrincipal(),
+                              role=eks_role,
                               version=cluster_k8s_version,
                               vpc_subnets=[ec2.SubnetType.PUBLIC,]
                               )
